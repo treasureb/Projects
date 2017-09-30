@@ -7,10 +7,10 @@ struct HuffmanTreeNode
 {
 	HuffmanTreeNode* _Left;
 	HuffmanTreeNode* _Right;
-	HuffmanTreeNode* _Parent;
-	T _w;
+	HuffmanTreeNode* _Parent;//添加指向父亲的结点是为了获取Huffman编码方便
+	T _weight;
 
-	HuffmanTreeNode(const T& data)
+	HuffmanTreeNode(T& data)
 		:_Left(NULL)
 		, _Right(NULL)
 		, _Parent(NULL)
@@ -19,52 +19,86 @@ struct HuffmanTreeNode
 };
 
 
-template<class T>
+template<class W>
 class HuffmanTree
 {
-	typedef HuffmanTreeNode<T> Node;
+	typedef HuffmanTreeNode<W> Node;
 public:
 	HuffmanTree()
 	{}
-	HuffmanTree(const T& array,size_t size,const T invalid)
+
+	HuffmanTree(W array[],size_t size,const W& invalid)
 	{
+		assert(array && size >= 0);
 		_CreateHuffmanTree(array, size, invalid);
 	}
 
 	~HuffmanTree()
 	{
-		_DestroyHuffmantree(_root);
+		_DestroyHuffmantree(_Root);
 	}
 
-	const Node* GetRoot()const
+	 Node* GetRoot()const
 	{
 		return _Root;
 	}
 
 private:
 
-	void _CreateHuffmanTree(const T array[], size_t size, const T invalid)
+	void _CreateHuffmanTree(W array[], size_t size, const W& invalid)
 	{
-		assert(array);
-		struct CompareNode
+		struct NodeCompareNode//按Node里面的权值比较，否则就是两个指针在比较了
 		{
-			bool operator()(const Node* left, const Node* right)
+			bool operator()(Node* left, Node* right)
 			{
-				return left->_w < right->_w;
+				return left->_weight < right->_weight;
 			}
 		};
 
-			Heap<Node* CompareNode> hp;
+		Heap<Node* ,NodeCompareNode> hp;
 
 		for (size_t index = 0; index < size; ++index)
 		{
-			if (invalid != array[index])
-				Heap::h
+			if (array[index] != invalid)
+				hp.Push(new Node(array[index]));
 		}
+
+		while (hp.Size() > 1)
+		{
+			Node *left = hp.Top();
+			hp.Pop();
+			Node *right = hp.Top();
+			hp.Pop();
+
+			Node *parent = new Node(left->_weight + right->_weight);//两个CharInfo类型，需要重载+
+			left->_Parent = parent;
+			right->_Parent = parent;
+			parent->_Left = left;
+			parent->_Right = right;
+
+			hp.Push(parent);
+		}
+		if (!hp.Empty())
+		_Root = hp.Top();
 	}
 
-	void _DestroyHuffmantree(Node* Root);
+	void _DestroyHuffmantree(Node* Root)
+	{
+		if (Root == NULL)
+			return;
+
+		if (Root->_Left)
+			_DestroyHuffmantree(Root->_Left);
+
+		if (Root->_Right)
+			_DestroyHuffmantree(Root->_Right);
+
+		delete Root;
+		Root = NULL;
+	}
+private:
+	HuffmanTree(const HuffmanTree<W>&);
+	HuffmanTree<W>& operator=(const HuffmanTree<W>&);
 private:
 	Node *_Root;
-	T _invalid;
 };
