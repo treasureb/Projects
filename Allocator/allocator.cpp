@@ -283,4 +283,92 @@ void* _default_alloc_template<threads,inst>::refill(size_t n)
     }
     //找到对应的自由链表，准备挂新的节点
     my_free_list = free_list+FREELIST_INDEX(n);
+
+    result = (obj *)chunk;//将第一块返回给客户端使用，其余的挂在自由链表中
+    *my_free_list = next_obj = (obj *)(chunk+n);
+    for(i = 1;;i++)
+    {
+        current_obj = next_obj;
+        next_obj = (obj *)((char *)next_obj + n);
+        if(nobjs - 1 == i)
+        {
+            current_obj ->free_list_link = 0;
+            break;
+        }
+        else
+        {
+            current_obj ->free_list_link = next_obj;
+        }
+    }
+
+    return result;
+}
+
+
+/*
+ *  内存池(memory pool)
+ *  从内存池中取空间给free_list使用，这部分有chunk_alloc完成
+ *
+ */
+
+template <bool threads,int inst>
+char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)//这里的nobjs是引用,会根据当前内存池的状态，调整个数
+{
+    char* result;
+    size_t total_bytes = size * nobjs;
+    size_t bytes_left = end_free - start_free;//内存池剩余空间
+
+    
+    if(bytes_left > total_bytes)
+    {
+        result = start_free;
+        start_free += total_bytes;
+        return result;
+    }
+    else if(bytes_left >= size)
+    {
+        nobjs = bytes_left/size;
+        total_bytes = size * nobjs;
+        result = start_free;
+        start_free += total_bytes;
+        return result;
+    }
+    else
+    {
+        size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);
+
+        if(bytes_left > 0)
+        {
+            obj * volatile *my_free_list = free_list + FREELIST_INDEX(bytes_left);
+            ((obj *)start_free)->free_list_link = *my_free_list;
+            *my_free_list = (obj *)start_free;
+        }
+
+        //配置heap空间
+        start_free = (char *)malloc(bytes_to_get);
+        if(0 == start_free)
+        {
+            int i;
+            obj * volatile *my_free_list,*p;
+
+            for(i = size;i <= _MAX_BYTES;i += _ALIGN)
+            {
+                my_free_list = free_list + FREELIST_INDEX(i);
+                p = *my_free_list;
+                if(0 != p)
+                {
+                    *my_free_list = p ->free_list_link;
+                    start_free = (char *)p;
+                    end_free = start_free + i;
+
+                    return (chunk_alloc(size,nobjs));
+                }
+            }
+            end_free = 0;
+            start_free = (char *)malloc_alloc::Allocate(bytes_to_get);
+        }
+        heap_size = bytes_to_get;
+        end_free = start_free + bytes_to_get;
+        return (chunk_alloc(size,nobjs));
+    }
 }
