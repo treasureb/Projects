@@ -6,6 +6,8 @@
 #define _THROW_BAD_ALLOC std::cerr <<"out of memory"<< std::endl;exit(1)
 #endif
 
+
+
 //一级空间配置器
 template <int inst>
 class _mallc_alloc_template
@@ -310,7 +312,6 @@ void* _default_alloc_template<threads,inst>::refill(size_t n)
  *  从内存池中取空间给free_list使用，这部分有chunk_alloc完成
  *
  */
-
 template <bool threads,int inst>
 char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)//这里的nobjs是引用,会根据当前内存池的状态，调整个数
 {
@@ -318,13 +319,13 @@ char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)
     size_t total_bytes = size * nobjs;
     size_t bytes_left = end_free - start_free;//内存池剩余空间
 
-    
-    if(bytes_left > total_bytes)
+    //如果内存池中的空间足够，则直接分配
+    if(bytes_left >= total_bytes)
     {
         result = start_free;
         start_free += total_bytes;
         return result;
-    }
+    }//如果内存池剩余内存不够分配20块，则能分配几块是几块
     else if(bytes_left >= size)
     {
         nobjs = bytes_left/size;
@@ -335,8 +336,10 @@ char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)
     }
     else
     {
+        //内存池空间已经不足以分配出来空间了，则准备malloc申请堆上的内存
         size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);
-
+        
+        //内存池中还有剩余的一点内存，挂到适当的自由链表当中去
         if(bytes_left > 0)
         {
             obj * volatile *my_free_list = free_list + FREELIST_INDEX(bytes_left);
@@ -347,10 +350,11 @@ char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)
         //配置heap空间
         start_free = (char *)malloc(bytes_to_get);
         if(0 == start_free)
-        {
+        {//堆上的空间不足，分配失败
             int i;
             obj * volatile *my_free_list,*p;
-
+            
+            //去更大的自由链表中找
             for(i = size;i <= _MAX_BYTES;i += _ALIGN)
             {
                 my_free_list = free_list + FREELIST_INDEX(i);
@@ -360,15 +364,22 @@ char* _default_alloc_template<threads,inst>::chunk_alloc(size_t size,int& nobjs)
                     *my_free_list = p ->free_list_link;
                     start_free = (char *)p;
                     end_free = start_free + i;
-
+                    //递归调用自己，修正nobjs的值
                     return (chunk_alloc(size,nobjs));
                 }
             }
+            /*
+             * 这里如果end_free不设置为0，调用一级空间配置器
+             * 系统则会认为有一段start-end的空间可用，而一旦
+             * 使用就会引发异常
+             */
             end_free = 0;
+            //调用一级空间配置器，看out-of-memory机制能否尽点力
             start_free = (char *)malloc_alloc::Allocate(bytes_to_get);
         }
         heap_size = bytes_to_get;
         end_free = start_free + bytes_to_get;
+        //递归调用自己，修正nobjs的值
         return (chunk_alloc(size,nobjs));
     }
 }

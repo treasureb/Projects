@@ -1,5 +1,8 @@
 #include"httpd.h"
 
+/*
+ * 打印错误日志
+ */
 void print_log(const char *msg,int level)
 {
 #ifdef _STDOUT_
@@ -13,6 +16,8 @@ void print_log(const char *msg,int level)
 #endif
 }
 
+/* 建立sock连接
+ */
 int startup(const char* ip,int port)
 {
     int sock = socket(AF_INET,SOCK_STREAM,0);
@@ -20,6 +25,8 @@ int startup(const char* ip,int port)
         print_log(strerror(errno),FATAL);
         exit(2);
     }
+
+    //地址复用，防止timewait状态导致服务器不能直接启动
     int opt = 1;
     setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
 
@@ -47,6 +54,13 @@ int startup(const char* ip,int port)
 static int Getline(long sock,char line[],int size)
 {
     //每次读取一个字符
+    //GET URL HTTP/1.1
+    /*
+     * ret > 1,line != '\0' 表示读的是数据;
+     * ret == 1 && line == '\n'表示空行;
+     * ret <= 0 && line == '\0'读完了;
+     * '\r' -> '\n'; '\r\n' -> '\n' 
+     */
     char c = '\0';
     int len  = 0;
     while(c != '\n' && len < size - 1 ){
@@ -54,22 +68,19 @@ static int Getline(long sock,char line[],int size)
         if(r > 0){
             if(r == '\r'){
                 //窥探下一个字符是否为'\n'
-                int ret = recv(sock,&c,1,MSG_PEEK);
-                if(ret > 0){
-                    if(c == '\n'){
+                recv(sock,&c,1,MSG_PEEK);
+                if(c == '\n')
                         recv(sock,&c,1,0);
-                    }else{
-                        c = '\n';
-                    }
-                }
-            }// \r -> \n  \r\n -> \n
-            line[len++] = c;
-        }else{
-            c = '\n';
+                    
+                    c = '\n';
+                }// \r -> \n  \r\n -> \n
+                line[len++] = c;
+            }else{
+               c = '\n';
+            }
         }
-    }
-    line[len] = '\0';
-    return len;
+       line[len] = '\0';
+       return len;
 }
 
 static void echo_string(long sock)
@@ -79,7 +90,6 @@ static void echo_string(long sock)
 
 static int echo_www(int sock,char *path,int size)
 {
-    printf("enter echo_www\n");
     //采用sendfile函数
     int fd = open(path,O_RDONLY);
     if(fd < 0){
@@ -109,7 +119,8 @@ static void drop_header(int sock)
     int ret  = -1;
     do{
         ret = Getline(sock,line,sizeof(line));
-    }while(ret > 0 && strcmp(line,"\n"));
+        printf("lien is %s\n", line);
+    }while(ret > 0 && strcmp(line,"\r\n"));
 }
 
 static int exe_cgi(int sock,char *method,char *path,char *query_string)
@@ -225,6 +236,7 @@ void *handler_request(void *arg)
     size_t i,j;
     int cgi = 0;
     char *query_string = NULL;
+    printf("Getline Before\n");
     if(Getline(sock,buf,sizeof(buf)) <= 0){
         echo_string(sock);
         ret = 5;
@@ -279,7 +291,7 @@ void *handler_request(void *arg)
     if(path[strlen(path) - 1] == '/'){
         strcat(path,"index.html");
     }
-    
+    printf("path is %s\n", path);
     //判断该目录是否合法
     struct stat st;
     if(stat(path,&st) != 0){
@@ -301,7 +313,6 @@ void *handler_request(void *arg)
         }else{
             printf("method: %s,url: %s,path: %s,cgi: %d,query_string: %s\n",method,url,path,cgi,query_string);
             drop_header(sock);
-            printf("enter echo_www\n");
             echo_www(sock,path,st.st_size);
         }
     }
