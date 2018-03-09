@@ -1,5 +1,5 @@
-mathcgi:mathcgi.c
+math_cgi:mathcgi.c
 	gcc -o $@ $^
 .PHONY:clean
 clean:
-	rm mathcgi
+	rm math_cgi
