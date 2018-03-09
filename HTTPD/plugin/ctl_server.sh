@@ -29,12 +29,12 @@ function start_server()
         echo "server is exist,pid is : $server_pid"
     else
         ip=$(awk -F: '/^IP/{print $NF}' $CONF)
-        #port=$(awk -F: '/^PORT/{print $NF;}' $CONF)
+        port=$(awk -F: '/^PORT/{print $NF;}' $CONF)
         echo $ip
-        #echo $port
+        echo $port
         
-        #$BIN $ip $port
-        #echo "start ... done"
+        $BIN $ip $port
+        echo "start ... done"
 
     fi
 }

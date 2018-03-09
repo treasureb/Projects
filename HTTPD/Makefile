@@ -1,5 +1,5 @@
 ROOT_PATH=$(shell pwd)
-CONF=$(ROOT_PATH)/conf/server.conf
+CONF=$(ROOT_PATH)/conf
 PLUGIN=$(ROOT_PATH)/plugin
 WWWROOT=$(ROOT_PATH)/wwwroot
 SQL=$(ROOT_PATH)/sql_connect

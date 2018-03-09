@@ -236,7 +236,6 @@ void *handler_request(void *arg)
     size_t i,j;
     int cgi = 0;
     char *query_string = NULL;
-    printf("Getline Before\n");
     if(Getline(sock,buf,sizeof(buf)) <= 0){
         echo_string(sock);
         ret = 5;
