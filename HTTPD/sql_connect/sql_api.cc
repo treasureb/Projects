@@ -30,24 +30,22 @@ int sqlApi::connect()
 int sqlApi::insert(const string& _name,\
            const string& _sex,\
            const string& _age,\
-           const string& _hobby,\
-           const string& _school)
+           const string& _school,\
+           const string& _seat)
 {
-    string sql = "insert into student (name,sex,age,hobby,school) values('";
+    string sql = "insert into SelectSeat (name,sex,age,school,seat) values('";
     sql += _name;
     sql += "','";
     sql += _sex;
     sql += "','";
     sql += _age;
     sql += "','";
-    sql += _hobby;
-    sql += "','";
     sql += _school;
+    sql += "','";
+    sql += _seat;
     sql += "')";
 
-    cout<<sql<<endl;
     int ret = mysql_query(conn,sql.c_str());
-    cout<<"ret:  "<<ret<<endl;
     return ret;
 }
 

@@ -20,8 +20,8 @@ public:
     int insert(const std::string& _name,\
                const std::string& _sex,\
                const std::string& _age,\
-               const std::string& _hobby,\
-               const std::string& _school);
+               const std::string& _schol,\
+               const std::string& _seat);
     int connect();
     int select();
     ~sqlApi();

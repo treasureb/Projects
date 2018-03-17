@@ -27,7 +27,7 @@ void insertToDb(const char* arg)
     sqlApi mydb("127.0.0.1",3306);
     mydb.connect();
     mydb.insert(myargv[0],myargv[1],myargv[2],myargv[3],myargv[4]);
-   // mydb.insert("xiaoguodong","man","21","coding","SUST");
+   // mydb.insert("xiaoguodong","man","21","SUST","D402");
 
 }
 
