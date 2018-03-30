@@ -93,32 +93,26 @@ class OperationFactory
 public:
     Operation* CreateOperate(char operate)
     {
-        Operation* oper = nullptr;
         switch(operate)
         {
             case '+':{
-                OperationAdd* add = new OperationAdd();
-                oper = add;
+                return new OperationAdd();
                 break;
                      }
             case '-':{
-                OperationSub* sub = new OperationSub();
-                oper = sub;
+                return new OperationSub();
                 break;
                     }
             case '*':{
-                OperationMul* mul = new OperationMul();
-                oper = mul;
+                return new OperationMul();
                 break;
                      }
             case '/':{
-                OperationDiv* div = new OperationDiv();
-                oper = div;
+                return new OperationDiv();
                 break;
                      }               
         }
-
-        return oper;
+        return nullptr;
     }
 };
 
