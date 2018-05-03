@@ -14,6 +14,7 @@ typedef struct sockaddr_in sockaddr_in;
 
 namespace client{
 
+//客户端核心的操作
 class ChatClient
 {
 public:

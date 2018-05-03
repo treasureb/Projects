@@ -10,6 +10,7 @@ struct Data
     std::string name;
     std::string school;
     std::string msg;
+    //只有两种取值，quit或者空
     std::string cmd;
 
     void Serialize(std::string* output){
