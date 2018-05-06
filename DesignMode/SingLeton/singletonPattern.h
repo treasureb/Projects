@@ -9,15 +9,14 @@ class singleton1
 private:
     singleton1()
     {}
-    static singleton1 *instance;
+    static singleton1 instance;
 public:
-    static singleton1 *getInstance()
+    static singleton1 getInstance()
     {
         return instance;
     }
 
 };
-singleton1 *singleton1::instance = new singleton1();
 
 //Lazy mode
 class singleton2
