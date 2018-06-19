@@ -3,29 +3,42 @@
 
 #include<unistd.h> /* usleep */
 #include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<time.h>
+#include<sys/time.h>
 #include"./keyboard/keyboard.h"
 
 #define true  1
 #define false 0
 #define bool int 
 
-#define FC 5
-#define BC 0
+#define FC 0
+#define BC 7
 #define W  10
 #define H  20
+
+
+
 
 /* 游戏的区域限定 */
 int background[H][W];
 
+/* 显示积分器和下一个图形区域 */
 struct data{
     int x;
     int y;
 };
 
+
 /* 每一个具体的图案*/  
 struct shape{
     int s[5][5];
 };
+
+/* 初始化随机数 */
+void init_shape_arg();
 
 /* 绘制每一个小方块 */
  void draw_element(int x,int y,int colour);
@@ -50,4 +63,10 @@ struct shape{
 
 /* 当一行都满了,然后进行消行 */
  void clear_line();
+
+ /* 游戏结束 */ 
+ void game_over();
+
+ /* 产生随机数 */
+ int rand_number();
 #endif /* __TETRIS_H__ */
