@@ -1,0 +1,9 @@
+crc.o: crc.c /usr/include/stdc-predef.h config.h global.h crc.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+global.h:
+
+crc.h:

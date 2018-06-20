@@ -1,0 +1,14 @@
+genre.lo: genre.c /usr/include/stdc-predef.h config.h global.h id3tag.h \
+ ucs4.h genre.dat
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+global.h:
+
+id3tag.h:
+
+ucs4.h:
+
+genre.dat:

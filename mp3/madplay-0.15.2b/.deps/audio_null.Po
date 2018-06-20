@@ -1,0 +1,12 @@
+audio_null.o: audio_null.c /usr/include/stdc-predef.h config.h global.h \
+ /usr/local/include/mad.h audio.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+global.h:
+
+/usr/local/include/mad.h:
+
+audio.h:

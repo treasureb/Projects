@@ -1,0 +1,11 @@
+crc.lo: crc.c /usr/include/stdc-predef.h config.h global.h id3tag.h crc.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+global.h:
+
+id3tag.h:
+
+crc.h:

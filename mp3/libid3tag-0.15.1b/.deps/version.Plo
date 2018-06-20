@@ -1,0 +1,12 @@
+version.lo: version.c /usr/include/stdc-predef.h config.h global.h \
+ id3tag.h version.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+global.h:
+
+id3tag.h:
+
+version.h:
