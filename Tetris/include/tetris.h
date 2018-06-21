@@ -8,7 +8,7 @@
 #include<signal.h>
 #include<time.h>
 #include<sys/time.h>
-#include"./keyboard/keyboard.h"
+#include"../keyboard/keyboard.h"
 
 #define true  1
 #define false 0
