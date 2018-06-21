@@ -32,7 +32,7 @@ void list_show( void ){
     do{
         printf("%s",cur->name);
         if(g_cur == cur){
-            printf("  当前播放歌曲");
+            printf("    <-: 当前播放歌曲");
         }
         printf("\n");
     }while( cur != g_head );
